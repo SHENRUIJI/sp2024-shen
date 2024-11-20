@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .weather-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #666;
+        }
+        .timestamp {
+            margin: 10px 0;
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Weather Data</h1>
+    <div class="weather-container">
+        <div class="timestamp" id="current-time"></div> <!-- sed to display the current time -->
+        <ul id="weather-list">
+            {% for data in weather_data %}
+                <li>
+                    <strong>City:</strong> {{ data.name }}<br>
+                    <strong>Temperature:</strong> {{ data.main.temp }} K<br>
+                    <strong>Weather:</strong> {{ data.weather[0].description }}<br>
+                    <strong>Humidity:</strong> {{ data.main.humidity }}%<br>
+                    <strong>Wind Speed:</strong> {{ data.wind.speed }} m/s
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="footer">The data comes from the Kafka message queue</div>
+
+    <script>
+        function fetchWeatherData() {
+            fetch('/api/weather')
+                .then(response => response.json())
+                .then(data => {
+                    const weatherList = document.getElementById('weather-list');
+                    weatherList.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <strong>City:</strong> ${item.name}<br>
+                                <strong>Temperature:</strong> ${item.main.temp} K<br>
+                                <strong>Weather:</strong> ${item.weather[0].description}<br>
+                                <strong>Humidity:</strong> ${item.main.humidity}%<br>
+                                <strong>Wind Speed:</strong> ${item.wind.speed} m/s
+                            `;
+                            weatherList.appendChild(li);
+                        });
+                    } else {
+                        weatherList.innerHTML = '<li>No available weather data</li>';
+                    }
+
+                    //Update the current time
+                    const currentTime = new Date().toLocaleString();
+                    document.getElementById('current-time').innerText = `Update the current time.: ${currentTime}`;
+                })
+                .catch(error => console.error('Error fetching weather data:', error));
+        }
+
+        // Update the data every 5 seconds
+        setInterval(fetchWeatherData, 5000);
+        // Fetch the data immediately when the page loads
+        fetchWeatherData();
+    </script>
+</body>
+</html>

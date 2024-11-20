@@ -1,0 +1,12 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    color: #333;
+}
+
+#weather-data p {
+    margin: 10px 0;
+    font-size: 18px;
+}
